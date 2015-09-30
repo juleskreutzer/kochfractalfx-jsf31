@@ -18,13 +18,16 @@ public class KochFractal extends Observable {
     private float hue;          // Hue value of color for next edge
     private boolean cancelled;  // Flag to indicate that calculation has been cancelled 
 
-    private void drawKochEdge(double ax, double ay, double bx, double by, int n) {
+    private void drawKochEdge(double ax, double ay, double bx, double by, int n) throws InterruptedException {
+        if(Thread.interrupted())
+            throw new InterruptedException("Interrupting during the drawKochEdge (execution)...");
+        
         if (!cancelled) {
             if (n == 1) {
-                hue = hue + 1.0f / nrOfEdges;
-                Edge e = new Edge(ax, ay, bx, by, Color.hsb(hue*360.0, 1.0, 1.0));
+                setHue(getHue() + 1.0f / nrOfEdges);
+                Edge e = new Edge(ax, ay, bx, by, Color.hsb(getHue()*360.0, 1.0, 1.0));     
                 this.setChanged();
-                this.notifyObservers(e);
+                this.notifyObservers(e);            
             } else {
                 double angle = Math.PI / 3.0 + Math.atan2(by - ay, bx - ax);
                 double distabdiv3 = Math.sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay)) / 3;
@@ -40,22 +43,28 @@ public class KochFractal extends Observable {
         }
     }
 
-    public void generateLeftEdge() {
-        hue = 0f;
-        cancelled = false;
-        drawKochEdge(0.5, 0.0, (1 - Math.sqrt(3.0) / 2.0) / 2, 0.75, level);
+    public void generateLeftEdge() throws InterruptedException {
+        synchronized(this) {
+            setHue(0f);
+            cancelled = false;
+            drawKochEdge(0.5, 0.0, (1 - Math.sqrt(3.0) / 2.0) / 2, 0.75, level);
+        }
     }
 
-    public void generateBottomEdge() {
-        hue = 1f / 3f;
-        cancelled = false;
-        drawKochEdge((1 - Math.sqrt(3.0) / 2.0) / 2, 0.75, (1 + Math.sqrt(3.0) / 2.0) / 2, 0.75, level);
+    public void generateBottomEdge() throws InterruptedException {
+        synchronized(this) {
+            setHue(1f / 3f);
+            cancelled = false;
+            drawKochEdge((1 - Math.sqrt(3.0) / 2.0) / 2, 0.75, (1 + Math.sqrt(3.0) / 2.0) / 2, 0.75, level);
+        }
     }
 
-    public void generateRightEdge() {
-        hue = 2f / 3f;
-        cancelled = false;
-        drawKochEdge((1 + Math.sqrt(3.0) / 2.0) / 2, 0.75, 0.5, 0.0, level);
+    public void generateRightEdge() throws InterruptedException {
+        synchronized(this) {
+            setHue(2f / 3f);
+            cancelled = false;
+            drawKochEdge((1 + Math.sqrt(3.0) / 2.0) / 2, 0.75, 0.5, 0.0, level);
+        }
     }
     
     public void cancel() {
@@ -74,5 +83,12 @@ public class KochFractal extends Observable {
     public int getNrOfEdges() {
         return nrOfEdges;
     }
-
+    
+    private void setHue(float hue) {
+        this.hue = hue;
+    }
+    
+    private synchronized float getHue() {
+        return this.hue;
+    }
 }
