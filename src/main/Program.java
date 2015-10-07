@@ -25,12 +25,16 @@ public class Program implements Observer {
     }
     
     public static void main(String[] args) {
-        Program program = new Program();
-        KochFractal koch = new KochFractal();
-        koch.setLevel(2);
-        koch.addObserver(program);
-        koch.generateBottomEdge();
-        koch.generateLeftEdge();
-        koch.generateRightEdge();
+        try {
+            Program program = new Program();
+            KochFractal koch = new KochFractal();
+            koch.setLevel(2);
+            koch.addObserver(program);
+            koch.generateBottomEdge();
+            koch.generateLeftEdge();
+            koch.generateRightEdge();
+        } catch (Exception ex) {
+            System.err.println("PROGRAM: " + ex.getMessage());
+        }
     }
 }

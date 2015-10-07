@@ -171,6 +171,13 @@ public class JSF31KochFractalFX extends Application {
         primaryStage.show();
     }
     
+    @Override
+    public void stop() throws Exception {
+        super.stop();
+        System.out.println("Closing the thread pool forcefully..");
+        kochManager.getThreadPool().shutdownNow();
+    }
+    
     public void clearKochPanel() {
         GraphicsContext gc = kochPanel.getGraphicsContext2D();
         gc.clearRect(0.0,0.0,kpWidth,kpHeight);
