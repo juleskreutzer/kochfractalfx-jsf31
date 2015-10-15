@@ -39,7 +39,7 @@ public class KochManager implements Observer{
         this.koch.addObserver(this);
 
         this.eService = Executors.newFixedThreadPool(3);
-        this.barrier = new CyclicBarrier(4);
+        this.barrier = new CyclicBarrier(3);
     }
     
     public void drawEdges() {
@@ -47,9 +47,11 @@ public class KochManager implements Observer{
 
         TimeStamp t = new TimeStamp();
         t.setBegin();
-
-        for(Edge e : edges) {
-            application.drawEdge(e); 
+        
+        synchronized(this) {
+            for(Edge e : edges) {
+                application.drawEdge(e); 
+            }
         }
 
         t.setEnd();
@@ -71,10 +73,13 @@ public class KochManager implements Observer{
                     try {
                         final TimeStamp t = new TimeStamp();
                         t.setBegin();
-                        barrier.await();
-                        edges.addAll(bottom.get());
-                        edges.addAll(left.get());
-                        edges.addAll(right.get());
+                        synchronized(getInstance()) {
+                            edges.addAll(bottom.get());
+                            Thread.currentThread().sleep(2400);
+                            edges.addAll(left.get());
+                            Thread.currentThread().sleep(2400);
+                            edges.addAll(right.get());
+                        }
                         t.setEnd();
                         
                         Platform.runLater(new Runnable() { 
@@ -106,6 +111,10 @@ public class KochManager implements Observer{
     
     public ExecutorService getThreadPool() {
         return eService;
+    }
+    
+    public KochManager getInstance() {
+        return this;
     }
 
     
